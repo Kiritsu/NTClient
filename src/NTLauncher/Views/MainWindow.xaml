@@ -1,0 +1,68 @@
+﻿<Window x:Class="NTLauncher.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:NTLauncher.ViewModels"
+        mc:Ignorable="d"
+	    SizeToContent="WidthAndHeight"
+        Title="NT Launcher v4 | Kiritsu"
+		MinWidth="450"
+		MinHeight="290"
+		d:DataContext="{d:DesignInstance vm:MainWindowModel}">
+	<Grid Margin="10">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition MinWidth="220" Width="*"></ColumnDefinition>
+			<ColumnDefinition Width="10"></ColumnDefinition>
+			<ColumnDefinition MinWidth="180" Width="*"></ColumnDefinition>
+		</Grid.ColumnDefinitions>
+		<GroupBox Grid.Column="0" Header="NT Accounts">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+				</Grid.RowDefinitions>
+				<ListBox Grid.Row="0" Margin="5 10 5 0" MinHeight="150" ItemsSource="{Binding Accounts}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedAccount}"></ListBox>
+				<Grid Grid.Row="1" Margin="0 10 0 0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"></ColumnDefinition>
+						<ColumnDefinition Width="*"></ColumnDefinition>
+						<ColumnDefinition Width="*"></ColumnDefinition>
+					</Grid.ColumnDefinitions>
+					<Button Grid.Column="0" Margin="5" Content="Start" Command="{Binding StartGameCommand}"></Button>
+					<Button Grid.Column="1" Margin="5" Content="Options" Command="{Binding OptionsCommand}"></Button>
+					<Button Grid.Column="2" Margin="5" Content="Quit" Command="{Binding QuitCommand}"></Button>
+				</Grid>
+			</Grid>
+		</GroupBox>
+		<Grid Grid.Column="1"></Grid>
+		<GroupBox Grid.Column="2" Header="GF Account">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="*"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+				</Grid.RowDefinitions>
+				<Label Grid.Row="0" Content="Email"></Label>
+				<TextBox Grid.Row="1" MinWidth="120" Text="{Binding Email}"></TextBox>
+				<Label Grid.Row="2" Content="Password"></Label>
+				<PasswordBox Grid.Row="3" MinWidth="120" Name="password"></PasswordBox>
+				<Button Grid.Row="4" Content="Connect" Width="100" Margin="0 10 0 0" Command="{Binding ConnectAccountsCommand}" CommandParameter="{Binding ElementName=password}"/>
+				<Separator Grid.Row="6" Margin="0 10 0 0"></Separator>
+				<Grid Grid.Row="7">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"></ColumnDefinition>
+						<ColumnDefinition Width="Auto"></ColumnDefinition>
+					</Grid.ColumnDefinitions>
+					<Button Grid.Column="0" Content="Clear accounts" Margin="5" HorizontalContentAlignment="Center" Command="{Binding ClearAccountsCommand}"></Button>
+					<CheckBox Grid.Column="1" Content="On Top" Width="70" VerticalAlignment="Center"></CheckBox>
+				</Grid>
+			</Grid>
+		</GroupBox>
+	</Grid>
+</Window>
