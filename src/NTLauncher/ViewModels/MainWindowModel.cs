@@ -55,6 +55,11 @@ namespace NTLauncher.ViewModels
             var accounts = await _spark.GetAccountsAsync(obj["token"]);
             foreach (var account in accounts)
             {
+                if (account.Value.GameId != "dd4e22d6-00d1-44b9-8126-d8b40e0cd7c9")
+                {
+                    continue;
+                }
+
                 Application.Current.Dispatcher.Invoke(()
                     => Accounts.Add(new InGameAccount
                     {

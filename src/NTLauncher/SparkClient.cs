@@ -59,6 +59,9 @@ namespace NTLauncher
         {
             [JsonProperty("displayName")]
             public string AccountName { get; set; }
+
+            [JsonProperty("gameId")]
+            public string GameId { get; set; }
         }
     }
 }
