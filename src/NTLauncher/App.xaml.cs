@@ -21,10 +21,13 @@ namespace NTLauncher
 
         private static IServiceProvider BuildServiceProvider()
         {
+            var nostalePath = Environment.GetEnvironmentVariable("NT_LAUNCHER");
+            
             return new ServiceCollection()
                 .AddTransient(x => new MainWindow { DataContext = x.GetService<MainWindowModel>() })
                 .AddTransient<MainWindowModel>()
                 .AddSingleton<SparkClient>()
+                .AddSingleton(nostalePath)
                 .BuildServiceProvider();
         }
     }

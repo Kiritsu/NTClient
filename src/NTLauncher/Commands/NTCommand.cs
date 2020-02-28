@@ -3,18 +3,28 @@ using System.Windows.Input;
 
 namespace NTLauncher.Commands
 {
-    public class NTCommand : ICommand
+    public class NTCommand<T> : ICommand
     {
-        public Action Callback { get; set; }
+        public Action<T> Callback { get; set; }
 
-        public event EventHandler CanExecuteChanged;
+        public virtual event EventHandler CanExecuteChanged;
 
-        public bool CanExecute(object _)
+        public virtual bool CanExecute(object _)
         {
             return true;
         }
 
-        public void Execute(object _)
+        public virtual void Execute(object _)
+        {
+            Callback((T)_);
+        }
+    }
+
+    public class NTCommand : NTCommand<object>
+    {
+        public new Action Callback { get; set; }
+
+        public override void Execute(object _)
         {
             Callback();
         }
