@@ -1,6 +1,10 @@
 NTLauncher
 
-This is not meant to be used. This project is *just* an idea of playing around with MVVM and WPF. I cannot be responsible of your account being blocked as using spark gameforge api outside of their official softwares may be against terms of services.
+This is not meant to be used! This is not a "NMC next gen".
+
+This project is *just* an idea of playing around with MVVM and WPF.
+
+I cannot be responsible of your account being blocked after using Spark Gameforge API outside of their official clients/softwares as it is probably against their terms of services.
 
 Inspired from https://github.com/morsisko/NosTale-Gfless
 
