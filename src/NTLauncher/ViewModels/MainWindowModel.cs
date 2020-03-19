@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using Newtonsoft.Json;
 using NTLauncher.Commands;
 using NTLauncher.Models;
+using NTLauncher.Views;
 
 namespace NTLauncher.ViewModels
 {
@@ -27,7 +28,12 @@ namespace NTLauncher.ViewModels
         public NTCommand OptionsCommand { get; set; }
         public NTCommand QuitCommand { get; set; }
         public NTCommand ClearAccountsCommand { get; set; }
+        public NTCommand<MainWindow> StayOnTopCommand { get; set; }
         public NTCommand<PasswordBox> ConnectAccountsCommand { get; set; }
+
+        public NTCommand QuitNTCommand { get; set; }
+        public NTCommand DeleteNTCommand { get; set; }
+        public NTCommand FrontNTCommand { get; set; }
 
         public MainWindowModel(SparkClient spark, string nostalePath)
         {
@@ -36,17 +42,60 @@ namespace NTLauncher.ViewModels
 
             Accounts = new ObservableCollection<InGameAccount>();
 
-            StartGameCommand = new NTCommand { Callback = OnStartPressed };
-            OptionsCommand = new NTCommand { Callback = OnOptionsPressed };
-            QuitCommand = new NTCommand { Callback = OnQuitPressed };
+            StartGameCommand = new NTCommand { Callback = OnStartButtonPressed };
+            OptionsCommand = new NTCommand { Callback = OnOptionsButtonPressed };
+            QuitCommand = new NTCommand { Callback = OnQuitButtonPressed };
             ClearAccountsCommand = new NTCommand { Callback = () => Accounts.Clear() };
-            ConnectAccountsCommand = new NTCommand<PasswordBox> { Callback = OnConnectPressed };
+            StayOnTopCommand = new NTCommand<MainWindow> { Callback = (w) => w.Topmost = !w.Topmost };
+            ConnectAccountsCommand = new NTCommand<PasswordBox> { Callback = OnConnectButtonPressed };
+
+            DeleteNTCommand = new NTCommand { Callback = OnDeletePressedListBoxItem };
+            QuitNTCommand = new NTCommand { Callback = OnQPressedListBoxItem };
+            FrontNTCommand = new NTCommand { Callback = OnEnterPressedListBoxItem };
         }
 
-        public async void OnStartPressed()
+        private void OnEnterPressedListBoxItem()
         {
+            if (SelectedAccount?.Process == null)
+            {
+                return;
+            }
+
+            InteropHelpers.BringWindowToTop(SelectedAccount.Process.MainWindowHandle);
+        }
+
+        private void OnDeletePressedListBoxItem()
+        {
+            if (SelectedAccount.Process != null && !SelectedAccount.Process.HasExited)
+            {
+                SelectedAccount.Process.Kill();
+                SelectedAccount.Process = null;
+            }
+
+            Accounts.Remove(SelectedAccount);
+            SelectedAccount = null;
+        }
+
+        private void OnQPressedListBoxItem()
+        {
+            if (SelectedAccount.Process != null && !SelectedAccount.Process.HasExited)
+            {
+                SelectedAccount.Process.Kill();
+                SelectedAccount.Process = null;
+            }
+
+            SelectedAccount = null;
+        }
+
+        private async void OnStartButtonPressed()
+        {
+            if (SelectedAccount is null)
+            {
+                return;
+            }
+
             var token = await _spark.GetTokenAsync(SelectedAccount.Token, SelectedAccount.Id);
-            Console.WriteLine(token);
+            Console.WriteLine("Account token: " + token);
 
             _ = Task.Run(() =>
             {
@@ -130,10 +179,11 @@ namespace NTLauncher.ViewModels
                 Arguments = "gf"
             };
             psi.Environment.Add("_TNT_CLIENT_APPLICATION_ID", "d3b2a0c1-f0d0-4888-ae0b-1c5e1febdafb");
-            Process.Start(psi);
+
+            SelectedAccount.Process = Process.Start(psi);
         }
 
-        public void OnOptionsPressed()
+        private void OnOptionsButtonPressed()
         {
             Process.Start(new ProcessStartInfo
             {
@@ -142,30 +192,44 @@ namespace NTLauncher.ViewModels
             });
         }
 
-        public void OnQuitPressed()
-        {
+        private void OnQuitButtonPressed()
+        { 
+            foreach (var account in Accounts)
+            {
+                account.Process?.Kill();
+            }
+
             Application.Current.Shutdown();
         }
 
-        public async void OnConnectPressed(PasswordBox passwordBox)
+        private async void OnConnectButtonPressed(PasswordBox passwordBox)
         {
-            var obj = await _spark.GetSessionAsync(Email, passwordBox.Password);
-            var accounts = await _spark.GetAccountsAsync(obj["token"]);
-            foreach (var account in accounts)
+            try
             {
-                if (account.Value.GameId != "dd4e22d6-00d1-44b9-8126-d8b40e0cd7c9")
-                {
-                    continue;
-                }
+                var obj = await _spark.GetSessionAsync(Email, passwordBox.Password);
+                var accounts = await _spark.GetAccountsAsync(obj["token"]);
 
-                Application.Current.Dispatcher.Invoke(()
-                    => Accounts.Add(new InGameAccount
+                foreach (var account in accounts)
+                {
+                    if (account.Value.GameId != "dd4e22d6-00d1-44b9-8126-d8b40e0cd7c9")
                     {
-                        Id = account.Key,
-                        Name = account.Value.AccountName,
-                        Email = Email,
-                        Token = obj["token"]
-                    }));
+                        continue;
+                    }
+
+                    Application.Current.Dispatcher.Invoke(()
+                        => Accounts.Add(new InGameAccount
+                        {
+                            Id = account.Key,
+                            Name = account.Value.AccountName,
+                            Email = Email,
+                            Token = obj["token"]
+                        }));
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
             }
         }
     }
